@@ -16,7 +16,7 @@ class URLCreateForm(FlaskForm):
     submit = SubmitField('Создать')
 
 
-class URlDownloadFileForm(FlaskForm):
+class URlUploadFileForm(FlaskForm):
     files = MultipleFileField(
         'Выберите файлы для загрузки',
         validators=[DataRequired(message='Загрузите хотя бы один файл')],
