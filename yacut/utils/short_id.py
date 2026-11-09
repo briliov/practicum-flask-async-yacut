@@ -1,7 +1,7 @@
 import random
 import string
 
-from .models import URLMap
+from ..models import URLMap
 
 
 def get_unique_short_id(length=6):
