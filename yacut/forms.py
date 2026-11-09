@@ -1,7 +1,9 @@
 from flask_wtf import FlaskForm
 from flask_wtf.file import MultipleFileField
 from wtforms import StringField, SubmitField, URLField
-from wtforms.validators import DataRequired, Length, Optional
+from wtforms.validators import DataRequired, Length, Optional, ValidationError
+
+from .models import URLMap
 
 
 class URLCreateForm(FlaskForm):
@@ -14,6 +16,13 @@ class URLCreateForm(FlaskForm):
         validators=[Optional(), Length(1, 16)],
     )
     submit = SubmitField('Создать')
+
+    def validate_custom_id(self, field):
+        if field.data:
+            if URLMap.query.filter_by(short=field.data).first():
+                raise ValidationError(
+                    'Предложенный вариант короткой ссылки уже существует.',
+                )
 
 
 class URlUploadFileForm(FlaskForm):
