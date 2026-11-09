@@ -38,7 +38,33 @@ def index_view():
     return render_template('index.html', form=form, short_link=short_link)
 
 
-@app.route('/files')
-def files_view():
+@app.route('/files', methods=['GET', 'POST'])
+async def files_view():
     form: URlUploadFileForm = URlUploadFileForm()
-    return render_template('upload.html', form=form)
+    uploaded_files: list = []
+    if form.validate_on_submit():
+        files_upload_data: list[
+            dict[str, str]
+        ] = await upload_files_to_yandex_disk(form.files.data)
+        for file_data in files_upload_data:
+            if 'file_url' in file_data.keys():
+                file_name: str = file_data['file_name']
+                file_url: str = file_data['file_url']
+                short_id: str = get_unique_short_id()
+                url_map: URLMap = URLMap(
+                    original=file_url,
+                    short=short_id,
+                )
+                uploaded_files.append(
+                    {
+                        'name': file_name,
+                        'short_link': url_for(
+                            'redirect_view',
+                            short_id=short_id,
+                            _external=True,
+                        ),
+                    },
+                )
+                db.session.add(url_map)
+        db.session.commit()
+    return render_template('upload.html', form=form, files=uploaded_files)
