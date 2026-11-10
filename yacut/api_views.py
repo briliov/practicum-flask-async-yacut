@@ -1,11 +1,12 @@
 """API for project YaCut"""
 
 from http import HTTPStatus
+import re
 
 from flask import jsonify, request, url_for
 
 from . import app, db
-from .constants import MAX_CUSTOM_ID_LENGTH
+from .constants import MAX_CUSTOM_ID_LENGTH, MIN_CUSTOM_ID_LENGTH
 from .error_handlers import InvalidAPIUsage
 from .models import URLMap
 from .utils.short_id import get_unique_short_id
@@ -13,21 +14,28 @@ from .utils.short_id import get_unique_short_id
 
 @app.route('/api/id/', methods=['POST'])
 def create_id():
-    data = request.json(silent=True)
+    data = request.get_json(silent=True)
     if not isinstance(data, dict):
         raise InvalidAPIUsage('Отсутствует тело запроса')
     if not (url := data.get('url')):
-        raise InvalidAPIUsage('Отсутствует поле url')
-    custom_id = data.get('custom_id')
-    if (custom_id and not isinstance(custom_id, str)) or (
-        custom_id and len(custom_id) > MAX_CUSTOM_ID_LENGTH
-    ):
-        raise InvalidAPIUsage('Указано недопустимое имя для короткой ссылки')
-    if custom_id and URLMap.query.filter_by(short=custom_id).first():
-        raise InvalidAPIUsage(
-            'Предложенный вариант короткой ссылки уже существует',
-        )
-    if not custom_id:
+        raise InvalidAPIUsage('"url" является обязательным полем!')
+    if custom_id := data.get('custom_id'):
+        if (
+            not isinstance(custom_id, str)
+            or (
+                len(custom_id)
+                not in range(MIN_CUSTOM_ID_LENGTH, MAX_CUSTOM_ID_LENGTH + 1)
+            )
+            or (not re.match(r'^[a-zA-Z0-9]+$', custom_id))
+        ):
+            raise InvalidAPIUsage(
+                'Указано недопустимое имя для короткой ссылки',
+            )
+        if URLMap.query.filter_by(short=custom_id).first():
+            raise InvalidAPIUsage(
+                'Предложенный вариант короткой ссылки уже существует.',
+            )
+    else:
         custom_id = get_unique_short_id()
     url_map: URLMap = URLMap(
         original=url,  # type: ignore
