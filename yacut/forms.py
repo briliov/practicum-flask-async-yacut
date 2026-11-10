@@ -23,7 +23,10 @@ class URLCreateForm(FlaskForm):
 
     def validate_custom_id(self, field):
         if field.data:
-            if URLMap.query.filter_by(short=field.data).first():
+            if (
+                URLMap.query.filter_by(short=field.data).first()
+                or field.data == 'files'
+            ):
                 raise ValidationError(
                     'Предложенный вариант короткой ссылки уже существует.',
                 )
