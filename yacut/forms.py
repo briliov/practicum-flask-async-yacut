@@ -3,6 +3,7 @@ from flask_wtf.file import MultipleFileField
 from wtforms import StringField, SubmitField, URLField
 from wtforms.validators import DataRequired, Length, Optional, ValidationError
 
+from .constants import MAX_CUSTOM_ID_LENGTH, MIN_CUSTOM_ID_LENGTH
 from .models import URLMap
 
 
@@ -13,7 +14,10 @@ class URLCreateForm(FlaskForm):
     )
     custom_id = StringField(
         'Добавьте кастомную сокращенную ссылку',
-        validators=[Optional(), Length(1, 16)],
+        validators=[
+            Optional(),
+            Length(MIN_CUSTOM_ID_LENGTH, MAX_CUSTOM_ID_LENGTH),
+        ],
     )
     submit = SubmitField('Создать')
 
