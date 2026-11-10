@@ -8,7 +8,9 @@ from .. import app
 
 YANDEX_DISK_AUTH_TOKEN = app.config['YANDEX_DISK_AUTH_TOKEN']
 UPLOAD_URL_ENDPOINT = 'https://cloud-api.yandex.net/v1/disk/resources/upload'
-PUBLISH_URL_ENDPOINT = 'https://cloud-api.yandex.net/v1/disk/resources/publish'
+DOWNLOAD_URL_ENDPOINT = (
+    'https://cloud-api.yandex.net/v1/disk/resources/download'
+)
 
 
 class YandexDiskError(Exception):
@@ -73,13 +75,13 @@ async def upload_file_by_url(
             )
 
 
-async def publish_file(
+async def get_url_for_download(
     session: aiohttp.ClientSession,
     path: str,
 ) -> str:
-    """Make the file public and return a link to its metadata (href)."""
-    async with session.put(
-        PUBLISH_URL_ENDPOINT,
+    """Returns a url for download file."""
+    async with session.get(
+        DOWNLOAD_URL_ENDPOINT,
         params={'path': path},
     ) as response:
         if response.status != HTTPStatus.OK:
@@ -89,21 +91,6 @@ async def publish_file(
             )
         data = await response.json()
         return data.get('href')
-
-
-async def get_public_link(
-    session: aiohttp.ClientSession,
-    meta_href: str,
-) -> str:
-    async with session.get(meta_href) as response:
-        if response.status != HTTPStatus.OK:
-            error_text = await response.text()
-            raise YandexDiskError(
-                f'Яндекс вернул {response.status}: {error_text}',
-            )
-
-        data = await response.json()
-        return data.get('public_url')
 
 
 async def process_file(
@@ -133,15 +120,11 @@ async def process_file(
             url_for_upload=url_for_upload,
         )
 
-        meta_href: str = await publish_file(
+        url_for_download: str = await get_url_for_download(
             session=session,
             path=path,
         )
 
-        url_for_download: str = await get_public_link(
-            session=session,
-            meta_href=meta_href,
-        )
         return {'file_name': file_name, 'file_url': url_for_download}
     except YandexDiskError as error:
         return {'file_name': file_name, 'error': str(error)}
