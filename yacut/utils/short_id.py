@@ -6,15 +6,21 @@ Checks the uniqueness of the generated ID in the database.
 """
 
 import random
-import string
 
 from ..models import URLMap
+from .constants import CHARACTERS, MAX_ATTEMPTS, UNIQ_SHORT_ID_MAX_LENGTH
+from .exceptions import ShortIDGenerationError
 
 
-def get_unique_short_id(length=6):
+def get_unique_short_id(
+    length=UNIQ_SHORT_ID_MAX_LENGTH,
+    max_attempts=MAX_ATTEMPTS,
+):
     """Returns a short unique ID."""
-    characters = string.ascii_letters + string.digits
-    while True:
-        short_id = ''.join(random.choices(characters, k=length))
-        if not URLMap.query.filter_by(short=short_id).first():
+    for _ in range(max_attempts):
+        short_id = ''.join(random.choices(CHARACTERS, k=length))
+        if not URLMap.is_short_id_taken(short_id=short_id):
             return short_id
+    raise ShortIDGenerationError(
+        f'Не удалось сгенерировать уникальный ID за {max_attempts} попыток.',
+    )

@@ -30,3 +30,7 @@ class InvalidAPIUsage(Exception):
 
     def to_dict(self) -> dict:
         return dict(message=self.message)
+
+
+class ShortIDGenerationError(Exception):
+    """Не удалось сгенерировать уникальный короткий ID."""
