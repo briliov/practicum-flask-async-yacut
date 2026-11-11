@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}
+    YaCut - укоротитель ссылок
+{% endblock title %}
+{% block content %}
+    <main>
+        <section class="container my-5 px-4">
+            <h1 class="text-center"><span style="color:red">Ya</span>Cut</h1>
+            <p class="text-center my-4">Загрузите файлы и получите на них короткие ссылки</p>
+            <div class="container">
+                <div class="row my-3">
+                    <div class="col-sm"></div>
+                    <div class="col-sm">
+                        <form method="post" novalidate enctype="multipart/form-data">
+                            {{ form.csrf_token }}
+                            <div>
+                                <div>
+                                    {{ form.files(class="form-control form-control-lg py-2 mb-3", placeholder=form.files.label.text) }}
+                                    {% if form.files.errors %}
+                                        {% for error in form.files.errors %}
+                                            <p><span style="color:red">{{ error }}</span></p>
+                                        {% endfor %}
+                                    {% endif %}
+                                </div>
+                                {{ form.submit(class="btn btn-primary") }}
+                            </div>
+                        </form>
+                    </div>
+                    <div class="col-sm"></div>
+                </div>
+            </div>
+            <div class="py-3 mb-3">
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                        {% for message in messages %}
+                            <p><span style="color:red">{{ message }}</span></p>
+                        {% endfor %}
+                    {% endif %}
+                {% endwith %}
+            </div>
+            {% if files %}
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm"></div>
+                        <div class="col-sm">
+                            <div class="text-center">
+                                <table class="table table-striped table-bordered">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th scope="col">Имя файла</th>
+                                            <th scope="col">Короткая ссылка</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for file in files %}
+                                            <tr>
+                                                <td>{{ file.name }}</td>
+                                                <td>
+                                                    <a href="{{ file.short_link }}"
+                                                       target="_blank">{{ file.short_link }}</a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <div class="col-sm"></div>
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+    </main>
+{% endblock %}

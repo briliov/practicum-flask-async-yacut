@@ -1,3 +1,10 @@
+"""
+YaCut application package.
+
+Creates a Flask instance, configures the database and
+logs all routes and error handlers.
+"""
+
 from flask import Flask
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
