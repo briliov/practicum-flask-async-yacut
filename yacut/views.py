@@ -1,4 +1,4 @@
-# pyright: reportCallIssue=false
+"""Views for YaCut project."""
 
 from flask import redirect, render_template, url_for
 
@@ -11,6 +11,7 @@ from .utils.yandex_disk import upload_files_to_yandex_disk
 
 @app.route('/<string:short_id>')
 def redirect_view(short_id: str):
+    """Redirects the user to the original link using the short ID."""
     url_map: URLMap = URLMap.query.filter_by(short=short_id).first_or_404()
     original: str = url_map.original
     return redirect(original)
@@ -18,6 +19,7 @@ def redirect_view(short_id: str):
 
 @app.route('/', methods=['GET', 'POST'])
 def index_view():
+    """Displays the home page and handles the creation of short links."""
     short_link = None
     form: URLCreateForm = URLCreateForm()
     if form.validate_on_submit():
@@ -25,8 +27,8 @@ def index_view():
         if not (custom_id := form.custom_id.data):
             custom_id = get_unique_short_id()
         url_map: URLMap = URLMap(
-            original=original_link,
-            short=custom_id,
+            original=original_link,  # type: ignore
+            short=custom_id,  # type: ignore
         )
         db.session.add(url_map)
         db.session.commit()
@@ -40,6 +42,8 @@ def index_view():
 
 @app.route('/files', methods=['GET', 'POST'])
 async def files_view():
+    """Displays the file upload page and handles the creation of short
+    links to them."""
     form: URlUploadFileForm = URlUploadFileForm()
     uploaded_files: list = []
     if form.validate_on_submit():
@@ -52,8 +56,8 @@ async def files_view():
                 file_url: str = file_data['file_url']
                 short_id: str = get_unique_short_id()
                 url_map: URLMap = URLMap(
-                    original=file_url,
-                    short=short_id,
+                    original=file_url,  # type: ignore
+                    short=short_id,  # type: ignore
                 )
                 uploaded_files.append(
                     {

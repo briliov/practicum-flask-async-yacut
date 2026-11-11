@@ -1,21 +1,11 @@
+"""Error handlers"""
+
 from http import HTTPStatus
 
 from flask import jsonify, render_template, request
 
 from . import app, db
-
-
-class InvalidAPIUsage(Exception):
-    status_code = HTTPStatus.BAD_REQUEST
-
-    def __init__(self, message: str, status_code=None) -> None:
-        super().__init__()
-        self.message = message
-        if status_code:
-            self.status_code = status_code
-
-    def to_dict(self) -> dict:
-        return dict(message=self.message)
+from .utils.exceptions import InvalidAPIUsage
 
 
 @app.errorhandler(InvalidAPIUsage)

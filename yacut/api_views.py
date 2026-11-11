@@ -6,14 +6,15 @@ import re
 from flask import jsonify, request, url_for
 
 from . import app, db
-from .constants import MAX_CUSTOM_ID_LENGTH, MIN_CUSTOM_ID_LENGTH
-from .error_handlers import InvalidAPIUsage
 from .models import URLMap
+from .utils.constants import MAX_CUSTOM_ID_LENGTH, MIN_CUSTOM_ID_LENGTH
+from .utils.exceptions import InvalidAPIUsage
 from .utils.short_id import get_unique_short_id
 
 
 @app.route('/api/id/', methods=['POST'])
 def create_id():
+    """Creates a new short link via the API."""
     data = request.get_json(silent=True)
     if not isinstance(data, dict):
         raise InvalidAPIUsage('Отсутствует тело запроса')
@@ -57,6 +58,7 @@ def create_id():
 
 @app.route('/api/id/<string:short_id>/', methods=['GET'])
 def get_url(short_id: str):
+    """Returns the original link by short ID."""
     if not (url_map := URLMap.query.filter_by(short=short_id).first()):
         raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
     return jsonify(

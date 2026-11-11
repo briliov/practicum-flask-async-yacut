@@ -1,13 +1,17 @@
+"""Forms for YaCut project."""
+
 from flask_wtf import FlaskForm
 from flask_wtf.file import MultipleFileField
 from wtforms import StringField, SubmitField, URLField
 from wtforms.validators import DataRequired, Length, Optional, ValidationError
 
-from .constants import MAX_CUSTOM_ID_LENGTH, MIN_CUSTOM_ID_LENGTH
 from .models import URLMap
+from .utils.constants import MAX_CUSTOM_ID_LENGTH, MIN_CUSTOM_ID_LENGTH
 
 
 class URLCreateForm(FlaskForm):
+    """Form for custom url for link."""
+
     original_link = URLField(
         'Добавьте оригинальную ссылку',
         validators=[DataRequired(message='Ссылка для сокращение обязательна')],
@@ -33,6 +37,8 @@ class URLCreateForm(FlaskForm):
 
 
 class URlUploadFileForm(FlaskForm):
+    """Form for creating custom url for uploaded file."""
+
     files = MultipleFileField(
         'Выберите файлы для загрузки',
         validators=[DataRequired(message='Загрузите хотя бы один файл')],

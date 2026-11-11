@@ -1,3 +1,5 @@
+"""Module for asynchronous work with the Yandex.Disk API."""
+
 import asyncio
 from http import HTTPStatus
 
@@ -5,36 +7,18 @@ import aiohttp
 from werkzeug.datastructures import FileStorage
 
 from .. import app
+from .exceptions import (
+    GetDowloadURLError,
+    UploadFailureError,
+    UploadURLNotFoundError,
+    YandexDiskError,
+)
 
 YANDEX_DISK_AUTH_TOKEN = app.config['YANDEX_DISK_AUTH_TOKEN']
 UPLOAD_URL_ENDPOINT = 'https://cloud-api.yandex.net/v1/disk/resources/upload'
 DOWNLOAD_URL_ENDPOINT = (
     'https://cloud-api.yandex.net/v1/disk/resources/download'
 )
-
-
-class YandexDiskError(Exception):
-    """Basic error when working with Yandex.Disk."""
-
-    pass
-
-
-class UploadURLNotFoundError(YandexDiskError):
-    """Failed to get download link."""
-
-    pass
-
-
-class UploadFailureError(YandexDiskError):
-    """Error loading files to Yandex disk."""
-
-    pass
-
-
-class GetDowloadURLError(YandexDiskError):
-    """Error receiving download link."""
-
-    pass
 
 
 async def get_url_for_upload(
