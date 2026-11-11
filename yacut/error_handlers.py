@@ -19,7 +19,7 @@ def page_not_found(error: HTTPStatus):
         return jsonify(
             {'message': 'Указанный id не найден'},
         ), HTTPStatus.NOT_FOUND
-    return render_template('404.html'), HTTPStatus.NOT_FOUND
+    return render_template('errors/404.html'), HTTPStatus.NOT_FOUND
 
 
 @app.errorhandler(500)
@@ -29,4 +29,4 @@ def internal_error(error: HTTPStatus):
         return jsonify(
             {'message': 'Внутренняя ошибка сервера'},
         ), HTTPStatus.INTERNAL_SERVER_ERROR
-    return render_template('500.html'), HTTPStatus.INTERNAL_SERVER_ERROR
+    return render_template('errors/500.html'), HTTPStatus.INTERNAL_SERVER_ERROR
