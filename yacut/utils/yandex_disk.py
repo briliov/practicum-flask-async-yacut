@@ -81,15 +81,16 @@ async def process_file(
     session: aiohttp.ClientSession,
     file: FileStorage,
 ) -> dict:
-    """Async algorithm for saving a file on YandexDisk and obtaining a link to it."""
+    """Async algorithm for saving a file on YandexDisk and
+    obtaining a link to it."""
     if not file or not file.filename:
         return {
             'filename': 'Неизвестный файл',
             'error': 'Файл пуст или не передан.',
         }
 
-    file_name: str = file.filename
-    path = f'app:/{file_name}'
+    file_name = file.filename
+    path = f'app:/{file_name}'  # type: ignore
     file_bytes: bytes = file.read()
 
     try:
