@@ -13,7 +13,7 @@ def invalid_api_usage(error: InvalidAPIUsage):
     return jsonify(error.to_dict()), error.status_code
 
 
-@app.errorhandler(404)
+@app.errorhandler(HTTPStatus.NOT_FOUND)
 def page_not_found(error: HTTPStatus):
     if request.path.startswith('/api/'):
         return jsonify(
@@ -22,7 +22,7 @@ def page_not_found(error: HTTPStatus):
     return render_template('errors/404.html'), HTTPStatus.NOT_FOUND
 
 
-@app.errorhandler(500)
+@app.errorhandler(HTTPStatus.INTERNAL_SERVER_ERROR)
 def internal_error(error: HTTPStatus):
     db.session.rollback()
     if request.path.startswith('/api/'):
