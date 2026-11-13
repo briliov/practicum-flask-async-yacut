@@ -4,7 +4,7 @@ from datetime import datetime
 
 
 from . import db
-from .utils.constants import RESERVED_SHORT_IDS
+from .utils.constants import MAX_CUSTOM_ID_LENGTH, RESERVED_SHORT_IDS
 
 
 class URLMap(db.Model):
@@ -12,7 +12,11 @@ class URLMap(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     original = db.Column(db.Text, nullable=False)
-    short = db.Column(db.String(16), nullable=False, unique=True)
+    short = db.Column(
+        db.String(MAX_CUSTOM_ID_LENGTH),
+        nullable=False,
+        unique=True,
+    )
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
 
