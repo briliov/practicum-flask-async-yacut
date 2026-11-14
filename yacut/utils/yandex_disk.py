@@ -94,7 +94,7 @@ async def process_file(
         }
 
     file_name = file.filename
-    path = f'app:/{file_name}'  # type: ignore
+    path = f'app:/{file_name}'  # type: ignore # noqa: E231
     file_bytes: bytes = file.read()
 
     try:

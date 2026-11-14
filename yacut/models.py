@@ -33,7 +33,10 @@ class URLMap(db.Model):
             raise ValueError(
                 'Предложенный вариант короткой ссылки уже существует.',
             )
-        url_map: URLMap = URLMap(original=original, short=short)  # type: ignore
+        url_map: URLMap = URLMap(
+            original=original,  # type: ignore
+            short=short,  # type: ignore
+        )
         db.session.add(url_map)
         db.session.commit()
         return url_map
