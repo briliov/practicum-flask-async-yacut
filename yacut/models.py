@@ -43,10 +43,10 @@ class URLMap(db.Model):
         """Automatically checks the ID format on any assignment."""
         if not value:
             raise ValueError('Короткий ID обязателен для заполнения.')
-        if not (MIN_CUSTOM_ID_LENGTH <= len(value) <= MAX_CUSTOM_ID_LENGTH):
-            raise ValueError('Указано недопустимое имя для короткой ссылки.')
-        if not re.match(r'^[a-zA-Z0-9]+$', value):
-            raise ValueError('Указано недопустимое имя для короткой ссылки.')
+        if not (
+            MIN_CUSTOM_ID_LENGTH <= len(value) <= MAX_CUSTOM_ID_LENGTH
+        ) or not re.match(r'^[a-zA-Z0-9]+$', value):
+            raise ValueError('Указано недопустимое имя для короткой ссылки')
         return value
 
     @staticmethod
@@ -68,7 +68,7 @@ class URLMap(db.Model):
         """Returns short url by short id."""
         short_url: str = url_for(
             'redirect_view',
-            short_id=short,
+            short=short,
             _external=True,
         )
         return short_url
