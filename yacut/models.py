@@ -58,10 +58,10 @@ class URLMap(db.Model):
         )
 
     @staticmethod
-    def get_original_link(short: str) -> str:
+    def get_original_link(short: str) -> str | None:
         """Returns original url by short id."""
-        url_map: URLMap = URLMap.query.filter_by(short=short).first_or_404()
-        return url_map.original
+        url_map = URLMap.query.filter_by(short=short).first()
+        return url_map.original if url_map else None
 
     @staticmethod
     def get_short_link(short: str) -> str:
