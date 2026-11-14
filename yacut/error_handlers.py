@@ -13,20 +13,20 @@ def invalid_api_usage(error: InvalidAPIUsage):
     return jsonify(error.to_dict()), error.status_code
 
 
-@app.errorhandler(404)
+@app.errorhandler(HTTPStatus.NOT_FOUND)
 def page_not_found(error: HTTPStatus):
     if request.path.startswith('/api/'):
         return jsonify(
             {'message': 'Указанный id не найден'},
         ), HTTPStatus.NOT_FOUND
-    return render_template('404.html'), HTTPStatus.NOT_FOUND
+    return render_template('errors/404.html'), HTTPStatus.NOT_FOUND
 
 
-@app.errorhandler(500)
+@app.errorhandler(HTTPStatus.INTERNAL_SERVER_ERROR)
 def internal_error(error: HTTPStatus):
     db.session.rollback()
     if request.path.startswith('/api/'):
         return jsonify(
             {'message': 'Внутренняя ошибка сервера'},
         ), HTTPStatus.INTERNAL_SERVER_ERROR
-    return render_template('500.html'), HTTPStatus.INTERNAL_SERVER_ERROR
+    return render_template('errors/500.html'), HTTPStatus.INTERNAL_SERVER_ERROR

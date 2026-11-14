@@ -6,25 +6,17 @@ from http import HTTPStatus
 class YandexDiskError(Exception):
     """Basic error when working with Yandex.Disk."""
 
-    pass
-
 
 class UploadURLNotFoundError(YandexDiskError):
     """Failed to get download link."""
-
-    pass
 
 
 class UploadFailureError(YandexDiskError):
     """Error loading files to Yandex disk."""
 
-    pass
-
 
 class GetDowloadURLError(YandexDiskError):
     """Error receiving download link."""
-
-    pass
 
 
 class InvalidAPIUsage(Exception):
@@ -38,3 +30,7 @@ class InvalidAPIUsage(Exception):
 
     def to_dict(self) -> dict:
         return dict(message=self.message)
+
+
+class ShortIDGenerationError(Exception):
+    """Не удалось сгенерировать уникальный короткий ID."""

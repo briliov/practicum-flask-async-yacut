@@ -1,19 +1,21 @@
 """Views for YaCut project."""
 
-from flask import redirect, render_template, url_for
+from http import HTTPStatus
+
+from flask import abort, flash, redirect, render_template, url_for
 
 from . import app, db
 from .forms import URLCreateForm, URlUploadFileForm
 from .models import URLMap
-from .utils.short_id import get_unique_short_id
+from .utils.short import get_unique_short
 from .utils.yandex_disk import upload_files_to_yandex_disk
 
 
-@app.route('/<string:short_id>')
-def redirect_view(short_id: str):
+@app.route('/<string:short>')
+def redirect_view(short: str):
     """Redirects the user to the original link using the short ID."""
-    url_map: URLMap = URLMap.query.filter_by(short=short_id).first_or_404()
-    original: str = url_map.original
+    if not (original := URLMap.get_original_link(short=short)):
+        abort(HTTPStatus.NOT_FOUND)
     return redirect(original)
 
 
@@ -23,21 +25,23 @@ def index_view():
     short_link = None
     form: URLCreateForm = URLCreateForm()
     if form.validate_on_submit():
-        original_link: str | None = form.original_link.data
-        if not (custom_id := form.custom_id.data):
-            custom_id = get_unique_short_id()
-        url_map: URLMap = URLMap(
-            original=original_link,  # type: ignore
-            short=custom_id,  # type: ignore
-        )
-        db.session.add(url_map)
-        db.session.commit()
-        short_link: str | None = url_for(
-            'redirect_view',
-            short_id=custom_id,
-            _external=True,
-        )
-    return render_template('index.html', form=form, short_link=short_link)
+        original: str | None = form.original_link.data
+        if not (short := form.custom_id.data):
+            short = get_unique_short()
+        try:
+            URLMap.create(
+                original=original,  # type: ignore
+                short=short,
+            )
+        except ValueError as error:
+            flash(f'Не удалось создать ссылку: {error}')
+            return render_template('index.html', form=form)
+        short_link = URLMap.get_short_link(short=short)
+    return render_template(
+        'index.html',
+        form=form,
+        short_link=short_link,
+    )
 
 
 @app.route('/files', methods=['GET', 'POST'])
@@ -51,24 +55,33 @@ async def files_view():
             dict[str, str]
         ] = await upload_files_to_yandex_disk(form.files.data)
         for file_data in files_upload_data:
-            if 'file_url' in file_data.keys():
-                file_name: str = file_data['file_name']
-                file_url: str = file_data['file_url']
-                short_id: str = get_unique_short_id()
-                url_map: URLMap = URLMap(
-                    original=file_url,  # type: ignore
-                    short=short_id,  # type: ignore
-                )
+            file_name: str = file_data['file_name']
+            if file_url := file_data.get('file_url'):
+                short: str = get_unique_short()
+                try:
+                    URLMap.create(
+                        original=file_url,
+                        short=short,
+                    )
+                except ValueError as error:
+                    flash(
+                        f'Не удалось создать ссылку для {file_name}: {error}',
+                    )
+                    continue
                 uploaded_files.append(
                     {
                         'name': file_name,
                         'short_link': url_for(
                             'redirect_view',
-                            short_id=short_id,
+                            short=short,
                             _external=True,
                         ),
                     },
                 )
-                db.session.add(url_map)
+            else:
+                flash(
+                    f'Не удалось загрузить файл {file_name}: '
+                    f'{file_data.get('error', 'Неизвестная ошибка')}',
+                )
         db.session.commit()
     return render_template('upload.html', form=form, files=uploaded_files)

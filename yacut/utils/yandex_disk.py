@@ -39,7 +39,9 @@ async def get_url_for_upload(
                 f'Яндекс вернул {response.status}: {error_text}',
             )
         data = await response.json()
-        return data.get('href')
+        if not (href := data.get('href')):
+            raise UploadURLNotFoundError('Яндекс не вернул ссылку.')
+        return href
 
 
 async def upload_file_by_url(
@@ -74,7 +76,9 @@ async def get_url_for_download(
                 f'Яндекс вернул {response.status}: {error_text}',
             )
         data = await response.json()
-        return data.get('href')
+        if not (href := data.get('href')):
+            raise GetDowloadURLError('Яндекс не вернул ссылку.')
+        return href
 
 
 async def process_file(
@@ -90,7 +94,7 @@ async def process_file(
         }
 
     file_name = file.filename
-    path = f'app:/{file_name}'  # type: ignore
+    path = f'app:/{file_name}'  # type: ignore # noqa: E231
     file_bytes: bytes = file.read()
 
     try:
@@ -111,7 +115,11 @@ async def process_file(
         )
 
         return {'file_name': file_name, 'file_url': url_for_download}
-    except YandexDiskError as error:
+    except (
+        YandexDiskError,
+        aiohttp.ClientError,
+        asyncio.TimeoutError,
+    ) as error:
         return {'file_name': file_name, 'error': str(error)}
 
 
