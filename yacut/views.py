@@ -79,9 +79,7 @@ async def files_view():
                     },
                 )
             else:
-                flash(
-                    f'Не удалось загрузить файл {file_name}: '
-                    f'{file_data.get('error', 'Неизвестная ошибка')}',
-                )
+                error_text = file_data.get('error', 'Неизвестная ошибка')
+                flash(f'Не удалось загрузить файл {file_name}: {error_text}')
         db.session.commit()
     return render_template('upload.html', form=form, files=uploaded_files)
