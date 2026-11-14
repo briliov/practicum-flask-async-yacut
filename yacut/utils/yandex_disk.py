@@ -94,7 +94,7 @@ async def process_file(
         }
 
     file_name = file.filename
-    path = f'app:/{file_name}'  # type: ignore # noqa: E231
+    path = f'app:/{file_name}'  # type: ignore
     file_bytes: bytes = file.read()
 
     try:
@@ -115,11 +115,7 @@ async def process_file(
         )
 
         return {'file_name': file_name, 'file_url': url_for_download}
-    except (
-        YandexDiskError,
-        aiohttp.ClientError,
-        asyncio.TimeoutError,
-    ) as error:
+    except (TimeoutError, YandexDiskError, aiohttp.ClientError) as error:
         return {'file_name': file_name, 'error': str(error)}
 
 

@@ -2,6 +2,7 @@
 
 from datetime import datetime
 import re
+from typing import Optional
 
 from flask import url_for
 from sqlalchemy.orm import validates
@@ -61,7 +62,7 @@ class URLMap(db.Model):
         )
 
     @staticmethod
-    def get_original_link(short: str) -> str | None:
+    def get_original_link(short: str) -> Optional[str]:
         """Returns original url by short id."""
         url_map = URLMap.query.filter_by(short=short).first()
         return url_map.original if url_map else None
