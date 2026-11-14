@@ -4,7 +4,6 @@ from datetime import datetime
 import re
 from typing import Optional
 
-from flask import url_for
 from sqlalchemy.orm import validates
 
 from . import db
@@ -66,13 +65,3 @@ class URLMap(db.Model):
         """Returns original url by short id."""
         url_map = URLMap.query.filter_by(short=short).first()
         return url_map.original if url_map else None
-
-    @staticmethod
-    def get_short_link(short: str) -> str:
-        """Returns short url by short id."""
-        short_url: str = url_for(
-            'redirect_view',
-            short=short,
-            _external=True,
-        )
-        return short_url

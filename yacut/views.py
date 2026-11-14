@@ -33,10 +33,14 @@ def index_view():
                 original=original,  # type: ignore
                 short=short,
             )
+            short_link = url_for(
+                'redirect_view',
+                short=short,
+                _external=True,
+            )
         except ValueError as error:
             flash(f'Не удалось создать ссылку: {error}')
             return render_template('index.html', form=form)
-        short_link = URLMap.get_short_link(short=short)
     return render_template(
         'index.html',
         form=form,
