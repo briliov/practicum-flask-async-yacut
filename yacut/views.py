@@ -21,21 +21,23 @@ def index_view():
     short_link = None
     form: URLCreateForm = URLCreateForm()
     if form.validate_on_submit():
-        original_link: str | None = form.original_link.data
-        if not (custom_id := form.custom_id.data):
-            custom_id = get_unique_short_id()
-        url_map: URLMap = URLMap(
-            original=original_link,  # type: ignore
-            short=custom_id,  # type: ignore
-        )
-        db.session.add(url_map)
-        db.session.commit()
-        short_link: str | None = url_for(
-            'redirect_view',
-            short_id=custom_id,
-            _external=True,
-        )
-    return render_template('index.html', form=form, short_link=short_link)
+        original: str | None = form.original_link.data
+        if not (short := form.custom_id.data):
+            short = get_unique_short()
+        try:
+            URLMap.create(
+                original=original,  # type: ignore
+                short=short,
+            )
+        except ValueError as error:
+            flash(f'Не удалось создать ссылку: {error}')
+            return render_template('index.html', form=form)
+        short_link = URLMap.get_short_link(short=short)
+    return render_template(
+        'index.html',
+        form=form,
+        short_link=short_link,
+    )
 
 
 @app.route('/files', methods=['GET', 'POST'])
