@@ -38,7 +38,6 @@ def create_id():
 @app.route('/api/id/<string:short>/', methods=['GET'])
 def get_url(short: str):
     """Returns the original link by short ID."""
-    original = URLMap.get_original_link(short=short)
-    if not original:
+    if not (original := URLMap.get_original_link(short=short)):
         raise InvalidAPIUsage('Указанный id не найден', HTTPStatus.NOT_FOUND)
     return jsonify({'url': original}), HTTPStatus.OK
