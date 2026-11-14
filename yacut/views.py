@@ -7,7 +7,7 @@ from flask import abort, flash, redirect, render_template, url_for
 from . import app, db
 from .forms import URLCreateForm, URlUploadFileForm
 from .models import URLMap
-from .utils.short_id import get_unique_short
+from .utils.short import get_unique_short
 from .utils.yandex_disk import upload_files_to_yandex_disk
 
 
