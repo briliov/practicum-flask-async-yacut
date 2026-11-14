@@ -1,11 +1,11 @@
 """Views for YaCut project."""
 
-from flask import redirect, render_template, url_for
+from flask import flash, redirect, render_template, url_for
 
 from . import app, db
 from .forms import URLCreateForm, URlUploadFileForm
 from .models import URLMap
-from .utils.short_id import get_unique_short_id
+from .utils.short_id import get_unique_short
 from .utils.yandex_disk import upload_files_to_yandex_disk
 
 
@@ -51,24 +51,33 @@ async def files_view():
             dict[str, str]
         ] = await upload_files_to_yandex_disk(form.files.data)
         for file_data in files_upload_data:
-            if 'file_url' in file_data.keys():
-                file_name: str = file_data['file_name']
-                file_url: str = file_data['file_url']
-                short_id: str = get_unique_short_id()
-                url_map: URLMap = URLMap(
-                    original=file_url,  # type: ignore
-                    short=short_id,  # type: ignore
-                )
+            file_name: str = file_data['file_name']
+            if file_url := file_data.get('file_url'):
+                short: str = get_unique_short()
+                try:
+                    URLMap.create(
+                        original=file_url,
+                        short=short,
+                    )
+                except ValueError as error:
+                    flash(
+                        f'Не удалось создать ссылку для {file_name}: {error}',
+                    )
+                    continue
                 uploaded_files.append(
                     {
                         'name': file_name,
                         'short_link': url_for(
                             'redirect_view',
-                            short_id=short_id,
+                            short=short,
                             _external=True,
                         ),
                     },
                 )
-                db.session.add(url_map)
+            else:
+                flash(
+                    f'Не удалось загрузить файл {file_name}: '
+                    f'{file_data.get('error', 'Неизвестная ошибка')}',
+                )
         db.session.commit()
     return render_template('upload.html', form=form, files=uploaded_files)
