@@ -8,3 +8,4 @@ CHARACTERS = string.ascii_letters + string.digits
 UNIQ_SHORT_ID_MAX_LENGTH = 6
 
 MAX_ATTEMPTS = 5
+RESERVED_SHORT_IDS = {'files', 'admin', 'api', 'login', 'static'}
