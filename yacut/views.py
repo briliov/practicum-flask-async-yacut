@@ -9,12 +9,10 @@ from .utils.short_id import get_unique_short_id
 from .utils.yandex_disk import upload_files_to_yandex_disk
 
 
-@app.route('/<string:short_id>')
-def redirect_view(short_id: str):
+@app.route('/<string:short>')
+def redirect_view(short: str):
     """Redirects the user to the original link using the short ID."""
-    url_map: URLMap = URLMap.query.filter_by(short=short_id).first_or_404()
-    original: str = url_map.original
-    return redirect(original)
+    return redirect(URLMap.get_original_link(short))
 
 
 @app.route('/', methods=['GET', 'POST'])
